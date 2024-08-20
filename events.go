@@ -86,6 +86,12 @@ type VideoMessage struct {
 	Info    VideoInfo `json:"info"`
 }
 
+type CardMessage struct {
+	MsgType string         `json:"msgtype"`
+	Body    map[string]any `json:"body"`
+	URL     string         `json:"url"`
+}
+
 // ImageMessage is an m.image event
 type ImageMessage struct {
 	MsgType string    `json:"msgtype"`

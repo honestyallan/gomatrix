@@ -110,6 +110,7 @@ func (cli *Client) ClearCredentials() {
 //   - The failure to create a filter.
 //   - Client.Syncer.OnFailedSync returning an error in response to a failed sync.
 //   - Client.Syncer.ProcessResponse returning an error.
+//
 // If you wish to continue retrying in spite of these fatal errors, call Sync() again.
 func (cli *Client) Sync() error {
 	// Mark the client as syncing.
@@ -320,14 +321,14 @@ func (cli *Client) RegisterGuest(req *ReqRegister) (*RespRegister, *RespUserInte
 //
 // This does not set credentials on the client instance. See SetCredentials() instead.
 //
-// 	res, err := cli.RegisterDummy(&gomatrix.ReqRegister{
-//		Username: "alice",
-//		Password: "wonderland",
-//	})
-//  if err != nil {
-// 		panic(err)
-// 	}
-// 	token := res.AccessToken
+//		res, err := cli.RegisterDummy(&gomatrix.ReqRegister{
+//			Username: "alice",
+//			Password: "wonderland",
+//		})
+//	 if err != nil {
+//			panic(err)
+//		}
+//		token := res.AccessToken
 func (cli *Client) RegisterDummy(req *ReqRegister) (*RespRegister, error) {
 	res, uia, err := cli.Register(req)
 	if err != nil && uia == nil {
@@ -573,6 +574,15 @@ func (cli *Client) SendVideo(roomID, body, url string) (*RespSendEvent, error) {
 		})
 }
 
+func (cli *Client) SendCard(roomID, url string, body map[string]any) (*RespSendEvent, error) {
+	return cli.SendMessageEvent(roomID, "m.room.message",
+		CardMessage{
+			MsgType: "m.cards",
+			Body:    body,
+			URL:     url,
+		})
+}
+
 // SendNotice sends an m.room.message event into the given room with a msgtype of m.notice
 // See http://matrix.org/docs/spec/client_server/r0.2.0.html#m-notice
 func (cli *Client) SendNotice(roomID, text string) (*RespSendEvent, error) {
@@ -595,10 +605,11 @@ func (cli *Client) MarkRead(roomID, eventID string) error {
 }
 
 // CreateRoom creates a new Matrix room. See https://matrix.org/docs/spec/client_server/r0.2.0.html#post-matrix-client-r0-createroom
-//  resp, err := cli.CreateRoom(&gomatrix.ReqCreateRoom{
-//  	Preset: "public_chat",
-//  })
-//  fmt.Println("Room:", resp.RoomID)
+//
+//	resp, err := cli.CreateRoom(&gomatrix.ReqCreateRoom{
+//		Preset: "public_chat",
+//	})
+//	fmt.Println("Room:", resp.RoomID)
 func (cli *Client) CreateRoom(req *ReqCreateRoom) (resp *RespCreateRoom, err error) {
 	urlPath := cli.BuildURL("createRoom")
 	err = cli.MakeRequest("POST", urlPath, req, &resp)
